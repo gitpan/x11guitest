@@ -1,0 +1,622 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>X11::GUITest - Provides GUI testing/interaction facilities</title>
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#installation">INSTALLATION</a></li>
+	<li><a href="#dependencies">DEPENDENCIES</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#version">VERSION</a></li>
+	<li><a href="#changes">CHANGES</a></li>
+	<li><a href="#functions">FUNCTIONS</a></li>
+	<li><a href="#other_documentation">OTHER DOCUMENTATION</a></li>
+	<li><a href="#copyright">COPYRIGHT</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#credits">CREDITS</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>X11::GUITest - Provides GUI testing/interaction facilities</p>
+<p>Developed by Dennis K. Paulsen</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+  use X11::GUITest qw/
+    StartApp
+    WaitWindowViewable
+    SetInputFocus
+    SendKeys
+  /;</pre>
+<pre>
+  # Start gedit application
+  StartApp('gedit');</pre>
+<pre>
+  # Wait for application window to come up and become viewable. 
+  my ($GEditWinId) = WaitWindowViewable('gedit');
+  if (!$GEditWinId) {
+    die(&quot;Couldn't find gedit window in time!&quot;);
+  }</pre>
+<pre>
+  # Ensure input focus is set to the window
+  SetInputFocus($GEditWinId);</pre>
+<pre>
+  # Send text to it
+  SendKeys(&quot;Hello, how are you?\n&quot;);</pre>
+<pre>
+  # Close Application (Alt-f, q).
+  SendKeys(&quot;%(f)q&quot;);</pre>
+<pre>
+  # Handle gedit's Question window if it comes up when closing.  Wait
+  # at most 5 seconds for it.
+  if (WaitWindowViewable('Question', undef, 5)) {
+    # DoN't Save (Alt-n)
+    SendKeys(&quot;%(n)&quot;);
+  }</pre>
+<p>
+</p>
+<hr />
+<h1><a name="installation">INSTALLATION</a></h1>
+<pre>
+  perl Makefile.PL
+  make
+  make test
+  make install</pre>
+<p>
+</p>
+<hr />
+<h1><a name="dependencies">DEPENDENCIES</a></h1>
+<p>An  X server with the XTest extensions enabled.  This seems to be the
+norm.  If it is not enabled, it usually can be by modifying the X
+server configuration (i.e., XF86Config).</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>This Perl package is intended to facilitate the testing of GUI applications
+by means of user emulation.  It can be used to test/interact with GUI
+applications; which have been built upon the X toolkit or other toolkits
+(i.e., GTK) that ``wrap'' X toolkit's functionality.</p>
+<p>
+</p>
+<hr />
+<h1><a name="version">VERSION</a></h1>
+<p>0.10</p>
+<p>
+</p>
+<hr />
+<h1><a name="changes">CHANGES</a></h1>
+<p>0.10 Tue Mar 05 2003 18:00:00
+- Initial Release.</p>
+<p>
+</p>
+<hr />
+<h1><a name="functions">FUNCTIONS</a></h1>
+<p>Parameters enclosed within [] are optional.</p>
+<p>If there are multiple optional parameters available for a function
+and you would like to specify the last one, for example, you can
+utilize undef for those parameters you don't specify.</p>
+<p>REGEX in the documentation below denotes an item that is treated as 
+a regular expression.  For example, the regex ``^OK$'' would look for
+an exact match for the word OK.</p>
+<dl>
+<dt><strong><a name="item_findwindowlike_titleregex_%5b%2c_windowidstartunde">FindWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER]</a></strong><br />
+</dt>
+<dd>
+Finds the window Ids of the windows matching the specified title regex.  
+Optionally one can specify the window to start under; which would allow
+one to constrain the search to child windows of that window.
+</dd>
+<dd>
+<p>An array of window Ids is returned for the matches found.  An empty
+array is returned if no matches were found.</p>
+</dd>
+<dd>
+<pre>
+  my @WindowIds = FindWindowLike('gedit');
+  # Only worry about first window found
+  my ($WindowId) = FindWindowLike('gedit');</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_waitwindowlike_titleregex_%5b%2c_windowidstartunde">WaitWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]</a></strong><br />
+</dt>
+<dd>
+Waits for a window to come up that matches the specified title regex.  
+Optionally one can specify the window to start under; which would allow
+one to constrain the search to child windows of that window.
+</dd>
+<dd>
+<p>One can optionally specify an alternative wait amount in seconds.  A
+window will keep being looked for that matches the specified title regex
+until this amount of time has been reached.  The default amount is defined
+in the DEF_WAIT constant available through the :CONST export tag.</p>
+</dd>
+<dd>
+<p>If a window is going to be manipulated by input, WaitWindowViewable is the
+more robust solution to utilize.</p>
+</dd>
+<dd>
+<p>An array of window Ids is returned for the matches found.  An empty
+array is returned if no matches were found.</p>
+</dd>
+<dd>
+<pre>
+  my @WindowIds = WaitWindowLike('gedit');
+  # Only worry about first window found
+  my ($WindowId) = WaitWindowLike('gedit');</pre>
+</dd>
+<dd>
+<pre>
+  WaitWindowLike('gedit') or die(&quot;gedit window not found!&quot;);</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_waitwindowviewable_titleregex_%5b%2c_windowidstart">WaitWindowViewable TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]</a></strong><br />
+</dt>
+<dd>
+Similar to WaitWindow, but only recognizes windows that are viewable.  When GUI
+applications are started, their window isn't necessarily viewable yet, let alone
+available for input, so this function is very useful.
+</dd>
+<dd>
+<p>Likewise, this function will only return an array of the matching window Ids for
+those windows that are viewable.  An empty array is returned if no matches were
+found.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_clickwindow_windowid_%5b%2c_x_offset%5d_%5b%2c_y_o">ClickWindow  WINDOWID [, X Offset] [, Y Offset] [, Button]</a></strong><br />
+</dt>
+<dd>
+Clicks on the specified window with the mouse.
+</dd>
+<dd>
+<p>Optionally one can specify the X offset and Y offset.  By default,
+the top left corner of the window is clicked on, with these two
+parameters one can specify a different position to be clicked on.</p>
+</dd>
+<dd>
+<p>One can also specify an alternative button.  The default button is
+M_LEFT, but M_MIDDLE and M_RIGHT are also available through the
+:CONST export tag.</p>
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success</p>
+</dd>
+<dd>
+<pre>
+  ClickWindow('gedit');</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_startapp_commandline">StartApp COMMANDLINE</a></strong><br />
+</dt>
+<dd>
+Uses the shell to execute a program.  A primative method is used
+to detach from the shell, so this function returns as soon as the
+program is called.  Useful for starting GUI applications and then
+going on to work with them.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success</p>
+</dd>
+<dd>
+<pre>
+  StartApp('gedit');</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_runapp_commandline">RunApp COMMANDLINE</a></strong><br />
+</dt>
+<dd>
+Uses the shell to execute a program until its completion.
+</dd>
+<dd>
+<p>Return value will be application specific, however -1 is returned
+to indicate a failure in starting the program.</p>
+</dd>
+<dd>
+<pre>
+  RunApp('/work/myapp');</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_seteventsenddelay_delayinmilliseconds">SetEventSendDelay DELAYINMILLISECONDS</a></strong><br />
+</dt>
+<dd>
+Sets the milliseconds of delay between events being sent to the
+X display.
+</dd>
+<dd>
+<p>Returns the old delay amount in milliseconds.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_geteventsenddelay">GetEventSendDelay</a></strong><br />
+</dt>
+<dd>
+Returns the current event sending delay amount in milliseconds.
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_setkeysenddelay_delayinmilliseconds">SetKeySendDelay DELAYINMILLISECONDS</a></strong><br />
+</dt>
+<dd>
+Sets the milliseconds of delay between keystrokes.
+</dd>
+<dd>
+<p>Returns the old delay amount in milliseconds.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getkeysenddelay">GetKeySendDelay</a></strong><br />
+</dt>
+<dd>
+Returns the current keystroke sending delay amount in milliseconds.
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getwindowname_windowid">GetWindowName WINDOWID</a></strong><br />
+</dt>
+<dd>
+Returns the window name for the specified window Id.  undef
+is returned if name could not be obtained.
+</dd>
+<dd>
+<pre>
+  # Return the name of the window that has the input focus.
+  my $WinName = GetWindowName(GetInputFocus());</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getrootwindow">GetRootWindow</a></strong><br />
+</dt>
+<dd>
+Returns the root window Id.  This is the top/root level window that
+all other windows are under.
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getchildwindows_windowid">GetChildWindows WINDOWID</a></strong><br />
+</dt>
+<dd>
+Returns an array of the child windows for the specified
+window Id.
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_movemouseabs_x%2c_y">MoveMouseAbs X, Y</a></strong><br />
+</dt>
+<dd>
+Moves the mouse cursor to the specified absolute position. one based.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_clickmousebutton_button">ClickMouseButton BUTTON</a></strong><br />
+</dt>
+<dd>
+Clicks the specified mouse button.  Available mouse buttons
+are: M_LEFT, M_MIDDLE, M_RIGHT  These are available through
+the :CONST export tag.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_sendkeys_keys">SendKeys KEYS</a></strong><br />
+</dt>
+<dd>
+Sends keystrokes to the window that has the input focus.
+</dd>
+<dd>
+<p>The keystrokes to send are those specified in KEYS.  Some characters
+have special meaning, they are:</p>
+</dd>
+<dd>
+<pre>
+        Modifier Keys:
+        ^       CTRL
+        %       ALT
+        +       SHIFT</pre>
+</dd>
+<dd>
+<pre>
+        Other Keys:
+        ~       ENTER
+        \n      ENTER
+        \t      TAB
+        ( and ) MODIFIER USAGE
+        { and } QUOTE CHARACTERS</pre>
+</dd>
+<dd>
+<p>Simply, one can send a text string like so:</p>
+</dd>
+<dd>
+<pre>
+        SendKeys('Hello, how are you today?');</pre>
+</dd>
+<dd>
+<p>Parenthesis allow a modifier to work on one or more characters.  For example:</p>
+</dd>
+<dd>
+<pre>
+        SendKeys('%(f)q'); # Alt-f, then press q
+        SendKeys('%(fa)^(m)'); # Alt-f, Alt-a, Ctrl-m
+        SendKeys('+(abc)'); # Uppercase ABC using shift modifier
+        SendKeys('+'); # Press shift</pre>
+</dd>
+<dd>
+<p>Braces are used to quote special characters, for utilizing aliased key
+names, or for special functionality. Multiple characters can be specified
+in a brace by space delimiting the entries.  Characters can be repeated using
+a number that is space delimited after the preceeding key.</p>
+</dd>
+<dd>
+<p>Quote Special Characters</p>
+</dd>
+<dd>
+<pre>
+        SendKeys('{{}'); # {
+        SendKeys('{+}'); # +</pre>
+</dd>
+<dd>
+<p>Aliased Key Names</p>
+</dd>
+<dd>
+<pre>
+        SendKeys('{BAC}'); # Backspace
+        SendKeys('{F1 F2 F3}'); # F1, F2, F3
+        SendKeys('{TAB 3}'); # Press TAB 3 times
+        SendKeys('{SPC 3 a b c}'); # Space 3 times, a, b, c</pre>
+</dd>
+<dd>
+<p>Special functionality currently available</p>
+</dd>
+<dd>
+<pre>
+        # Pause execution for 500 milliseconds
+        SendKeys('{PAUSE 500}');</pre>
+</dd>
+<dd>
+<p>Combinations</p>
+</dd>
+<dd>
+<pre>
+        SendKeys('abc+(abc){TAB PAUSE 500}'); a, b, c, A, B, C, Tab, Pause 500</pre>
+</dd>
+<dd>
+<p>The following abbreviated key names are currently recognized within a brace set.  If you
+don't see the desired key, you can still use the unabbreviated name for the key.  If you
+are unsure of this name, utilize the xev (X event view) tool, press the button you
+need and look at the tools output for the name of the key.  Names that are in the list
+below can be utilized regardless of case.  Ones that aren't in this list are going to be
+case sensitive and also not abbreviated.  For example, using 'xev' you will find that the
+name of the backspace key is BackSpace, so you could use {BackSpace} in place of {bac}
+if you really wanted to.</p>
+</dd>
+<dd>
+<pre>
+        Name    Action
+        -------------------
+        BAC     BackSpace
+        BS      BackSpace
+        BKS     BackSpace
+        BRE     Break
+        CAN     Cancel
+        CAP     Caps_Lock
+        DEL     Delete
+        DOW     Down
+        END     End
+        ENT     Return
+        ESC     Escape
+        HEL     Help
+        HOM     Home
+        INS     Insert
+        LEF     Left
+        NUM     Num_Lock
+        PGD     Page_Down
+        PGU     Page_Up
+        PRT     Print
+        RIG     Right
+        SCR     Scroll_Lock
+        TAB     Tab
+        UP      Up
+        F1      F1
+        ...     ...
+        F12     F12
+        SPC     Space
+        SPA     Space
+        LSK     Super_L
+        RSK     Super_R
+        MNU     Menu</pre>
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_iswindow_windowid">IsWindow WINDOWID</a></strong><br />
+</dt>
+<dd>
+zero is returned if the specified window Id is not for something
+that can be recognized as a window.  non-zero is returned if it
+looks like a window.
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_iswindowviewable_windowid">IsWindowViewable WINDOWID</a></strong><br />
+</dt>
+<dd>
+zero is returned if the specified window Id is for a window that
+isn't viewable.  non-zero is returned if the window is viewable.
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_movewindow_windowid%2c_x%2c_y">MoveWindow WINDOWID, X, Y</a></strong><br />
+</dt>
+<dd>
+Moves the window to the specified location. one based
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_resizewindow_windowid%2c_width%2c_height">ResizeWindow WINDOWID, WIDTH, HEIGHT</a></strong><br />
+</dt>
+<dd>
+Resizes the window to the specified size.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_iconifywindow_windowid">IconifyWindow WINDOWID</a></strong><br />
+</dt>
+<dd>
+Minimizes (Iconifies) the specified window.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_uniconifywindow_windowid">UnIconifyWindow WINDOWID</a></strong><br />
+</dt>
+<dd>
+Unminimizes (UnIconifies) the specified window.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_raisewindow_windowid">RaiseWindow WINDOWID</a></strong><br />
+</dt>
+<dd>
+Raises the specified window to the top of the stack, so
+that no other windows cover it.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_lowerwindow_windowid">LowerWindow WINDOWID</a></strong><br />
+</dt>
+<dd>
+Lowers the specified window to the bottom of the stack, so
+other existing windows will cover it.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getinputfocus">GetInputFocus</a></strong><br />
+</dt>
+<dd>
+Returns the window that currently has the input focus.
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_setinputfocus_windowid">SetInputFocus WINDOWID</a></strong><br />
+</dt>
+<dd>
+Sets the specified window to be the one that has the input focus.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getwindowpos_windowid">GetWindowPos WINDOWID</a></strong><br />
+</dt>
+<dd>
+Returns an array containing the position information for the specified
+window.
+</dd>
+<dd>
+<pre>
+  my ($x, $y, $width, $height) = GetWindowPos(GetRootWindow());</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getscreenres">GetScreenRes</a></strong><br />
+</dt>
+<dd>
+Returns the screen resolution.
+</dd>
+<dd>
+<pre>
+  my ($x, $y) = GetScreenRes();</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getscreendepth">GetScreenDepth</a></strong><br />
+</dt>
+<dd>
+Returns the color depth for the screen.
+</dd>
+<dd>
+<p>Value is represented as bits, i.e. 16.</p>
+</dd>
+<dd>
+<pre>
+  my $depth = GetScreenDepth();</pre>
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="other_documentation">OTHER DOCUMENTATION</a></h1>
+<a href='Copying'>Copy of the GPL License</a><br>
+<a href='CodingStyle'>Coding-Style Guidelines</a><br>
+<a href='ToDo'>ToDo List</a><br>
+<a href='Packaging'>Some Packaging Information</a><br><p>
+</p>
+<hr />
+<h1><a name="copyright">COPYRIGHT</a></h1>
+<p><code>Copyright(c)</code> 2003 Dennis K. Paulsen, All Rights Reserved.  This
+program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Dennis K. Paulsen (<a href="mailto:ctrondlp@users.sourceforge.net">ctrondlp@users.sourceforge.net</a>)
+
+</p>
+<p>
+</p>
+<hr />
+<h1><a name="credits">CREDITS</a></h1>
+<p>None at this time.
+
+</p>
+
+</body>
+
+</html>
